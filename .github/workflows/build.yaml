@@ -5,19 +5,27 @@ on:
     branches: [ master ]
 
 jobs:
-  image-build:
-    name: Image Build
+  my-job:
+    name: CI/CD Job
     runs-on: ubuntu-latest
     steps:
+
+      - name: Checkout master branch
+        uses: actions/checkout@v2
+
       - name: Set up JDK 1.8
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
-      - name: build-push
-      uses: docker/build-push-action@v1
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-        registry: docker.io
-        repository: swannporteil/cloudcomputing
-        tag_with_sha: true
+
+      - name: Maven Clean, Test & Package
+        run: mvn -B clean package --file pom.xml
+
+      - name: Docker Build & Push
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          repository: swannporteil/cloudcomputing
+          tag_with_ref: true
+          tag_with_sha: true
