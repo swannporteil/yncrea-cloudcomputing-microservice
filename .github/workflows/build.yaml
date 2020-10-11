@@ -26,6 +26,6 @@ jobs:
         with:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-          repository: swannporteil/yncrea-hellomicro
+          repository: swannporteil/cloudcomputing
           tag_with_ref: true
           tag_with_sha: true
