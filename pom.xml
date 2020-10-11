@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.3.4.RELEASE</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>com.yncrea</groupId>
+	<artifactId>cloudcomputing</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>cloudcomputing</name>
+	<description>Demo project for Spring Boot</description>
+
+	<properties>
+		<java.version>1.8</java.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.junit.vintage</groupId>
+					<artifactId>junit-vintage-engine</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+		    <groupId>io.fabric8</groupId>
+		    <artifactId>docker-maven-plugin</artifactId>
+		    <version>0.33.0</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.kiwigrid</groupId>
+		    <artifactId>helm-maven-plugin</artifactId>
+		    <version>5.4</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+		        <groupId>io.fabric8</groupId>
+		        <artifactId>docker-maven-plugin</artifactId>
+		        <version>0.33.0</version>
+                <configuration>
+                    <images>
+                        <image>
+                            <name>swannporteil/yncrea-hellomicro</name>
+                        </image>
+                    </images>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>docker-build</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+		    </plugin>
+		    <plugin>
+                <groupId>com.kiwigrid</groupId>
+                <artifactId>helm-maven-plugin</artifactId>
+                <version>5.4</version>
+                <configuration>
+                    <chartDirectory>${project.basedir}/src/helm/chart/yncrea-hellomicro</chartDirectory>
+                    <chartVersion>${project.version}</chartVersion>
+                    <outputDirectory>${project.build.directory}</outputDirectory>
+                    <!-- This is the related section to use local binary with auto-detection enabled. -->
+                    <useLocalHelmBinary>true</useLocalHelmBinary>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>helm-lint</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>lint</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>helm-package</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>package</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>${exec-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>exec-helm-delete</id>
+                        <phase>pre-integration-test</phase>
+                        <configuration>
+                            <executable>helm</executable>
+                            <commandlineArgs>delete silly-unicorn</commandlineArgs>
+                            <successCodes>
+                                <successCode>0</successCode>
+                                <successCode>1</successCode>
+                            </successCodes>
+                        </configuration>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>exec-helm-install</id>
+                        <phase>pre-integration-test</phase>
+                        <configuration>
+                            <executable>helm</executable>
+                            <commandlineArgs>install silly-unicorn ${project.build.directory}/yncrea-hellomicro-${project.version}.tgz </commandlineArgs>
+                        </configuration>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+		</plugins>
+	</build>
+
+</project>
