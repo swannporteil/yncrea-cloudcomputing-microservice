@@ -22,10 +22,10 @@ jobs:
         run: mvn -B clean package --file pom.xml
 
       - name: Docker Build & Push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v1
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
           repository: swannporteil/yncrea-hellomicro
           tag_with_ref: true
           tag_with_sha: true
